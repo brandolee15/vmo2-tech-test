@@ -76,3 +76,28 @@ vmo2-tech-test/
 ├── .gitignore           
 └── output/              # Pipeline output (not committed to Git)
 ```
+
+## Future Features
+
+### Cloud Dataflow Runner
+Currently the pipeline runs locally using Apache Beam's DirectRunner. A natural next step would be to migrate to Google Cloud Dataflow as the runner, which would allow the pipeline to scale horizontally across multiple workers and handle much larger transaction datasets efficiently.
+
+### Automated Pipeline Orchestration with Cloud Composer
+The pipeline currently requires manual execution. This could be automated by deploying it as a DAG (Directed Acyclic Graph) using Apache Airflow on Google Cloud Composer, allowing the pipeline to run on a schedule (e.g. daily or weekly).
+
+### Event-Driven Triggering with Cloud Functions
+Rather than running on a fixed schedule, a Cloud Function could be set up to automatically trigger the pipeline whenever a new transactions CSV file is uploaded to a GCS bucket. This would make the pipeline fully event-driven and reactive to new data arriving.
+
+### Cloud Storage Output
+Currently the output is written to a local `output/` directory. This could be updated to write directly to a GCS bucket, making the results accessible to other services and team members.
+
+### BigQuery Integration and Looker Studio
+Instead of writing the output to a local json file, the pipleine could be extended to write the aggregated results directly to a BigQuery tables. This would make the data immediately queryable by analysts and other downstream systems without any manual steps.
+
+Once the data is in BigQuery, it can be connected to Looker Studio to create interactive dashboards for end users.
+
+### Data Quality Checks
+Add validation steps to the pipeline to catch malformed rows, missing values, or unexpected data types before processing, making the pipeline more robust in production.
+
+### CI/CD Pipeline
+Set up GitHub Actions to automatically run the unit tests on every push, ensuring the pipeline is always in a working state.

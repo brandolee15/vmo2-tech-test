@@ -34,12 +34,12 @@ class TransactionSummary(beam.PTransform):
             | 'Parse' >> beam.Map(parse_row)
             | 'FilterAmount' >> beam.Filter(lambda x: x['amount'] > 20)         # Filter amounts more than 20
             | 'FilterDate' >> beam.Filter(lambda x: x['date'][:4] >= '2010')    # Takes YYYY
-            | 'ToKV' >> beam.Map(lambda x: (x['date'], x['amount']))
-            | 'SumByDate' >> beam.CombinePerKey(sum)                            # Sum up amounts by dates
+            | 'ToKV' >> beam.Map(lambda x: (x['date'], x['amount']))            # Converts to a tuple of key-value pairs ('date', amount)
+            | 'SumByDate' >> beam.CombinePerKey(sum)                            # Sum up amounts by the key (date)
         )
 
 if __name__ == '__main__':
-    options = PipelineOptions()
+    options = PipelineOptions()         # Default settings to run on DirectRunner on a local machine
     with beam.Pipeline(options=options) as p:
         (
             p
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                 skip_header_lines=1
             )
             | 'Transform' >> TransactionSummary()
-            | 'Format' >> beam.Map(lambda kv: json.dumps({'date': kv[0], 'total_amount': kv[1]}))
+            | 'Format' >> beam.Map(lambda kv: json.dumps({'date': kv[0], 'total_amount': kv[1]}))   # Maps the tuple to a json dump by using the key-values
             | 'Write' >> beam.io.WriteToText(
                 'output/results.jsonl',
                 file_name_suffix = '.gz',

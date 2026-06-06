@@ -31,7 +31,7 @@ git clone https://github.com/brandolee15/vmo2-tech-test.git
 cd vmo2-tech-test
 ```
 
-### 2. Download the transactiond data
+### 2. Download the transactions data
 ```bash
 curl "https://storage.googleapis.com/cloud-samples-data/bigquery/sample-transactions/transactions.csv" -o transactions.csv
 ```

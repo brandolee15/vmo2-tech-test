@@ -34,12 +34,17 @@ if __name__ == '__main__':
     with beam.Pipeline(options=options) as p:
         (
             p
-            | 'Read' >> 
-            | 'Parse' >>
-            | 'FilterAmount' >>
-            | 'FilterDate' >> 
-            | 'ToKV' >>
-            | 'SumByDate' >>
-            | 'Format' >>
-            | 'Write' >> 
+            | 'Read' >> beam.io.ReadFromText(
+                'gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv',
+                skip_header_lines=1
+            )
+            | 'Parse' >> beam.Map(parse_row)
+            | 'FilterAmount' >> beam.Filter(lambda x: x['amount'] > 20)         # Filter amounts more than 20
+            | 'FilterDate' >> beam.Filter(lambda x: x['date'][:4] >= '2010')    # Takes YYYY
+            | 'ToKV' >> beam.Map(lambda x: (x['date'], x['amount']))
+            | 'SumByDate' >> beam.CombinePerKey(sum)
+            | 'Format' >> beam.Map(lambda kv: json.dumps({'date': kv[0], 'total_amount': kv[1]}))
+            | 'Write' >> beam.io.WriteToText(
+                'output/results.jsonl'                                          # Test json before compression
+            )
         )

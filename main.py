@@ -12,8 +12,6 @@
 # Task 2
 # Following up on the same Apache Beam batch job, also do the following 1. Group all transform steps into a single Composite Transform 1. 
 # Add a unit test to the Composite Transform using tooling / libraries provided by Apache Beam
-# Add a unit test to the Composite Transform using tooling / libraries provided by Apache Beam
-# Add a unit test to the Composite Transform using tooling / libraries provided by Apache Beam
 #----------------------------#
 
 import json

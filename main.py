@@ -29,6 +29,17 @@ def parse_row(row):
         'amount': float(parts[3].strip())   # Extracts float values (Fourth column)
     }
 
+class TransactionSummary(beam.PTransform):
+    def expand(self, pcoll):
+        return (
+            pcoll
+            | 'Parse' >> beam.Map(parse_row)
+            | 'FilterAmount' >> beam.Filter(lambda x: x['amount'] > 20)         # Filter amounts more than 20
+            | 'FilterDate' >> beam.Filter(lambda x: x['date'][:4] >= '2010')    # Takes YYYY
+            | 'ToKV' >> beam.Map(lambda x: (x['date'], x['amount']))
+            | 'SumByDate' >> beam.CombinePerKey(sum)                            # Sum up amounts by dates
+        )
+
 if __name__ == '__main__':
     options = PipelineOptions()
     with beam.Pipeline(options=options) as p:
@@ -38,11 +49,7 @@ if __name__ == '__main__':
                 'transactions.csv',
                 skip_header_lines=1
             )
-            | 'Parse' >> beam.Map(parse_row)
-            | 'FilterAmount' >> beam.Filter(lambda x: x['amount'] > 20)         # Filter amounts more than 20
-            | 'FilterDate' >> beam.Filter(lambda x: x['date'][:4] >= '2010')    # Takes YYYY
-            | 'ToKV' >> beam.Map(lambda x: (x['date'], x['amount']))
-            | 'SumByDate' >> beam.CombinePerKey(sum)                            # Sum up amounts by dates
+            | 'Transform' >> TransactionSummary()
             | 'Format' >> beam.Map(lambda kv: json.dumps({'date': kv[0], 'total_amount': kv[1]}))
             | 'Write' >> beam.io.WriteToText(
                 'output/results.jsonl',

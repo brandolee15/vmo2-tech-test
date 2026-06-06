@@ -42,9 +42,11 @@ if __name__ == '__main__':
             | 'FilterAmount' >> beam.Filter(lambda x: x['amount'] > 20)         # Filter amounts more than 20
             | 'FilterDate' >> beam.Filter(lambda x: x['date'][:4] >= '2010')    # Takes YYYY
             | 'ToKV' >> beam.Map(lambda x: (x['date'], x['amount']))
-            | 'SumByDate' >> beam.CombinePerKey(sum)
+            | 'SumByDate' >> beam.CombinePerKey(sum)                            # Sum up amounts by dates
             | 'Format' >> beam.Map(lambda kv: json.dumps({'date': kv[0], 'total_amount': kv[1]}))
             | 'Write' >> beam.io.WriteToText(
-                'output/results.jsonl'                                          # Test json before compression
+                'output/results.jsonl',
+                file_name_suffix = '.gz',
+                compression_type = beam.io.filesystem.CompressionTypes.GZIP    # Write output to JSON, then compress using .gz                                      
             )
         )
